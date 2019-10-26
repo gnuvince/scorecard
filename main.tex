@@ -1,20 +1,6 @@
-\pdfinfo
-  { /Title          (scorecard.pdf)
-    /Creator        (Metapost, TeX)
-    /Author         (Vincent Foley) }
-\input miniltx
-\input graphicx.sty
-\input eplain
-\resetatcatcode
-\pdfpagewidth 11 true in
-\pdfpageheight 8.5 true in
-\topmargin 0.75cm
-\bottommargin 0.75cm
-\leftmargin 1.00cm
-\rightmargin 0.75cm
-\nopagenumbers
-\parindent=0pt\parskip=8pt
-\vfill
-\includegraphics[scale=25]{scorecard-1.pdf}
-\vfill\eject
-\bye
+\documentclass{minimal}
+\usepackage{graphicx}
+\usepackage[letterpaper, landscape, margin=0cm]{geometry}
+\begin{document}
+\includegraphics[scale=1]{scorecard-1.pdf}
+\end{document}

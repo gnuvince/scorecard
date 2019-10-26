@@ -1,5 +1,5 @@
 main.pdf: main.tex scorecard-1.pdf
-	pdftex $<
+	pdflatex $<
 
 scorecard-1.pdf: scorecard.mp
 	mptopdf $<
