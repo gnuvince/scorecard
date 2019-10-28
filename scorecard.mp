@@ -6,6 +6,7 @@ color box_color; box_color := (.6, .6, .6);
 
 players := 9;
 innings := 12;
+extra_innings := 4;
 inning_box_len := 40;
 name_box_width := inning_box_len * 3;
 diamond_len := 0.2 * inning_box_len;
@@ -34,17 +35,23 @@ enddef;
 
 def draw_name_box(expr x, y, number) =
   path box;
+  % Give more vertical room for 9th inning.
+  if number = 9:
+    dy := inning_box_len * 2;
+  else:
+    dy := inning_box_len;
+  fi;
   box :=
        (x, y)
     -- (x+name_box_width, y)
-    -- (x+name_box_width, y-inning_box_len)
-    -- (x, y-inning_box_len)
+    -- (x+name_box_width, y-dy)
+    -- (x, y-dy)
     -- cycle;
   draw box withcolor box_color;
   label(decimal number, (x+4, y-6));
 enddef;
 
-def draw_inning_box_header(expr x, y, inning) =
+def draw_field_box_header(expr x, y, inning, extra_descr) =
   path box;
   d := inning_box_len;
   box :=
@@ -55,10 +62,11 @@ def draw_inning_box_header(expr x, y, inning) =
     -- cycle;
   pickup pensquare scaled 0.5pt;
   draw box withcolor box_color;
-  label(decimal inning, (x + inning_box_len/2, y - inning_box_len/2));
+  label.bot(decimal inning, (x + inning_box_len/2, y - inning_box_len/2));
+  label.top(extra_descr, (x + inning_box_len/2, y - inning_box_len/2));
 enddef;
 
-def draw_summary_box(expr x, y, descr) =
+def draw_empty_box(expr x, y, descr, extra_inning) =
   path box;
   d := inning_box_len;
   box :=
@@ -69,28 +77,18 @@ def draw_summary_box(expr x, y, descr) =
     -- cycle;
   pickup pensquare scaled 0.5pt;
   draw box withcolor box_color;
-  label(descr, (x + d/2, y - d/2));
 enddef;
 
-def draw_inning_box(expr x, y) =
-  path box;
-  d := inning_box_len;
-  box :=
-       (x, y)
-    -- (x, y-d)
-    -- (x+d, y-d)
-    -- (x+d, y)
-    -- cycle;
-  pickup pensquare scaled 0.5pt;
+def draw_field_box(expr x, y) =
   draw_field(x + d/2, y - .68d);
-  draw box withcolor box_color;
+  draw_empty_box(x, y, "", "");
 enddef;
 
 beginfig (1)
   %% Inning headers
   for i = 0 upto innings - 1:
     x := name_box_width + i * inning_box_len;
-    draw_inning_box_header(x, 0, i+1);
+    draw_field_box_header(x, 0, i+1, "");
   endfor;
 
   %% Player stats headers
@@ -99,8 +97,9 @@ beginfig (1)
   stats[1] := "H";
   stats[2] := "R";
   stats[3] := "RBI";
-  for i = 0 upto 3:
-    draw_summary_box(gap + name_box_width + (i+innings)*inning_box_len, 0, stats[i]);
+  for i = 0 upto extra_innings-1:
+    x := gap + name_box_width + (i+innings)*inning_box_len;
+    draw_field_box_header(x, 0, innings+i+1, stats[i]);
   endfor;
 
   for j = 0 upto players - 1:
@@ -109,12 +108,12 @@ beginfig (1)
 
     for i = 0 upto innings - 1:
       x := name_box_width + i * inning_box_len;
-      draw_inning_box(x, -y);
+      draw_field_box(x, -y);
     endfor;
 
     for i = innings upto innings + 3:
       x := gap + name_box_width + i * inning_box_len;
-      draw_summary_box(x, -y, "");
+      draw_empty_box(x, -y, "", "");
     endfor
 
   endfor;
