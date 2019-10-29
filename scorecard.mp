@@ -82,7 +82,7 @@ def draw_empty_box(expr x, y, descr, extra_inning) =
 enddef;
 
 def draw_field_box(expr x, y) =
-  draw_field(x + d/2, y - .68d);
+  draw_field(x + .42d, y - .7d);
   draw_empty_box(x, y, "", "");
 enddef;
 
