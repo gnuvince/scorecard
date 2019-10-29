@@ -1,3 +1,5 @@
+verbatimtex \font\small    pcrb at 9pt etex
+
 defaultfont := "pcrb";
 defaultscale := 1.2;
 
@@ -84,6 +86,15 @@ def draw_field_box(expr x, y) =
   draw_empty_box(x, y, "", "");
 enddef;
 
+def draw_inning_summary_box(expr x, y) =
+  d := inning_box_len;
+  draw_empty_box(x, y, "", "");
+  label(btex {\small H} etex, (x + .1d, y - .1d));
+  label(btex {\small R} etex, (x + .1d, y - .35d));
+  label(btex {\small E} etex, (x + .1d, y - .60d));
+  label(btex {\small LOB} etex, (x + .25d, y - .85d));
+enddef;
+
 beginfig (1)
   %% Inning headers
   for i = 0 upto innings - 1:
@@ -102,6 +113,7 @@ beginfig (1)
     draw_field_box_header(x, 0, innings+i+1, stats[i]);
   endfor;
 
+  %% Draw one row per batter
   for j = 0 upto players - 1:
     y := (j+1) * inning_box_len;
     draw_name_box(0, -y, j+1);
@@ -111,11 +123,21 @@ beginfig (1)
       draw_field_box(x, -y);
     endfor;
 
-    for i = innings upto innings + 3:
+    for i = innings upto innings + extra_innings - 1:
       x := gap + name_box_width + i * inning_box_len;
       draw_empty_box(x, -y, "", "");
     endfor
-
   endfor;
+
+  %% Draw last row for inning totals
+  y := (players + 1) * inning_box_len;
+  for i = 0 upto innings + extra_innings - 1:
+    x := name_box_width + i * inning_box_len;
+    if i >= innings:
+      x := x + gap;
+    fi;
+    draw_inning_summary_box(x, -y);
+  endfor;
+
 endfig;
 bye
