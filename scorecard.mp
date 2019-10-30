@@ -6,85 +6,59 @@ defaultscale := 1.2;
 color field_color; field_color := (.8, .8, .8);
 color box_color; box_color := (.6, .6, .6);
 
-batters             := 9;
-pitchers            := 6;
-innings             := 12;
-extra_innings       := 4;
-inning_box_len      := 40;
-pitching_box_height := inning_box_len / 2;
-name_box_width      := inning_box_len * 3;
-diamond_len         := inning_box_len / 5;
-gap                 := 2;
+batters             := 9; % How many batter boxes
+pitchers            := 6; % How many pitcher boxes
+innings             := 12; % How many innings with a diamond
+extra_innings       := 4;  % How many diamond-less innings and/or stats boxes
+inning_box_len      := 40; % How wide/tall an inning box is
+pitching_box_height := inning_box_len / 2; % How tall a pitcher's name box is
+name_box_width      := inning_box_len * 3; % How wide a batter or pitcher's name box is
+diamond_len         := inning_box_len / 5; % How big the diamond should be
+gap                 := 4; % How big gaps should be
 
+%% Draw an empty box at (x,y) with width = w and height = h.
+def draw_box(expr x, y, w, h) =
+  path box;
+  box := (x, y) -- (x+w, y) -- (x+w, y-h) -- (x, y-h) -- cycle;
+  pickup pensquare scaled 0.5pt;
+  draw box withcolor box_color;
+enddef;
+
+%% Draw a small baseball field.
 def draw_field(expr x, y) =
   path wholefield;
   path diamond;
   d := diamond_len;
   wholefield :=
-       (x, y)
-    -- (x-2d, y+2d)
-    .. (x, y+3.2d)
-    .. (x+2d, y+2d)
-    -- cycle;
+    (x, y) -- (x-2d, y+2d) .. (x, y+3.2d) .. (x+2d, y+2d) -- cycle;
   diamond :=
-       (x, y)
-    -- (x-d, y+d)
-    -- (x, y+2d)
-    -- (x+d, y+d)
-    -- cycle;
+    (x, y) -- (x-d, y+d) -- (x, y+2d) -- (x+d, y+d) -- cycle;
   pickup pensquare scaled 0.25pt;
   draw wholefield withcolor field_color;
   draw diamond withcolor field_color;
 enddef;
 
-def draw_name_box(expr x, y, dy, descr) =
-  path box;
-  box :=
-       (x, y)
-    -- (x+name_box_width, y)
-    -- (x+name_box_width, y-dy)
-    -- (x, y-dy)
-    -- cycle;
-  draw box withcolor box_color;
-  label(descr, (x+4, y-6));
-enddef;
-
-def draw_field_box_header(expr x, y, inning, extra_descr) =
-  path box;
-  d := inning_box_len;
-  box :=
-    (x, y)
-    -- (x, y-d)
-    -- (x+d, y-d)
-    -- (x+d, y)
-    -- cycle;
-  pickup pensquare scaled 0.5pt;
-  draw box withcolor box_color;
-  label.bot(decimal inning, (x + inning_box_len/2, y - inning_box_len/2));
-  label.top(extra_descr, (x + inning_box_len/2, y - inning_box_len/2));
-enddef;
-
-def draw_empty_box(expr x, y, descr, extra_inning) =
-  path box;
-  d := inning_box_len;
-  box :=
-    (x, y)
-    -- (x, y-d)
-    -- (x+d, y-d)
-    -- (x+d, y)
-    -- cycle;
-  pickup pensquare scaled 0.5pt;
-  draw box withcolor box_color;
-enddef;
 
 def draw_field_box(expr x, y) =
-  draw_field(x + .42d, y - .7d);
-  draw_empty_box(x, y, "", "");
+  draw_field(x + .42 * inning_box_len, y - .7 * inning_box_len);
+  draw_box(x, y, inning_box_len, inning_box_len);
+enddef;
+
+def draw_inning_header(expr x, y, top_label, bottom_label) =
+  d := inning_box_len;
+  label.top(top_label, (x + d/2, y - d/2));
+  label.bot(bottom_label, (x + d/2, y - d/2));
+  draw_box(x, y, d, d);
+enddef;
+
+def draw_name_box(expr x, y, dy, descr) =
+  draw_box(x, y, name_box_width, dy);
+  label(descr, (x+4, y-6));
 enddef;
 
 def draw_inning_summary_box(expr x, y) =
   d := inning_box_len;
-  draw_empty_box(x, y, "", "");
+  draw_box(x, y, inning_box_len, inning_box_len);
   label(btex {\small H} etex, (x + .1d, y - .1d));
   label(btex {\small R} etex, (x + .1d, y - .35d));
   label(btex {\small E} etex, (x + .1d, y - .60d));
@@ -92,16 +66,8 @@ def draw_inning_summary_box(expr x, y) =
 enddef;
 
 def draw_pitcher_header(expr x, y, dx, descr) =
-  path box;
-  dy := pitching_box_height;
-  box :=
-       (x, y)
-    -- (x+dx, y)
-    -- (x+dx, y-dy)
-    -- (x, y-dy)
-    -- cycle;
-  draw box withcolor box_color;
-  label(descr, (x+dx/2, y-dy/2));
+  draw_box(x, y, dx, pitching_box_height);
+  label(descr, (x+dx/2, y-pitching_box_height/2));
 enddef;
 
 def draw_pitcher_header_line(expr x, y) =
@@ -127,13 +93,17 @@ def draw_pitcher_line(expr x, y, number) =
 enddef;
 
 beginfig (1)
-  %% Inning headers
+  %% Batters header
+  draw_box(0, 0, name_box_width, inning_box_len);
+  label.bot("Batter", (name_box_width/2, -(inning_box_len/2)));
+
+  %% Regular inning headers
   for i = 0 upto innings - 1:
     x := name_box_width + i * inning_box_len;
-    draw_field_box_header(x, 0, i+1, "");
+    draw_inning_header(x, 0, "", decimal (i+1));
   endfor;
 
-  %% Player stats headers
+  %% Player stats / extra innings headers
   string stats[];
   stats[0] := "AB";
   stats[1] := "H";
@@ -141,18 +111,18 @@ beginfig (1)
   stats[3] := "RBI";
   for i = 0 upto extra_innings-1:
     x := gap + name_box_width + (i+innings)*inning_box_len;
-    draw_field_box_header(x, 0, innings+i+1, stats[i]);
+    draw_inning_header(x, 0, stats[i], decimal (innings+i+1));
   endfor;
 
   %% Draw one row per batter
-  for j = 0 upto batters - 1:
-    y := (j+1) * inning_box_len;
-    if j = 8:
+  for j = 1 upto batters:
+    y := j * inning_box_len;
+    if j = batters:
       height := 2*inning_box_len;
     else:
       height := inning_box_len;
     fi;
-    draw_name_box(0, -y, height, decimal (j+1));
+    draw_name_box(0, -y, height, decimal j);
 
     for i = 0 upto innings - 1:
       x := name_box_width + i * inning_box_len;
@@ -161,7 +131,7 @@ beginfig (1)
 
     for i = innings upto innings + extra_innings - 1:
       x := gap + name_box_width + i * inning_box_len;
-      draw_empty_box(x, -y, "", "");
+      draw_box(x, -y, inning_box_len, inning_box_len);
     endfor
   endfor;
 
