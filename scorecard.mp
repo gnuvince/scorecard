@@ -6,13 +6,15 @@ defaultscale := 1.2;
 color field_color; field_color := (.8, .8, .8);
 color box_color; box_color := (.6, .6, .6);
 
-players := 9;
-innings := 12;
-extra_innings := 4;
-inning_box_len := 40;
-name_box_width := inning_box_len * 3;
-diamond_len := 0.2 * inning_box_len;
-gap := 2;
+batters             := 9;
+pitchers            := 6;
+innings             := 12;
+extra_innings       := 4;
+inning_box_len      := 40;
+pitching_box_height := inning_box_len / 2;
+name_box_width      := inning_box_len * 3;
+diamond_len         := inning_box_len / 5;
+gap                 := 2;
 
 def draw_field(expr x, y) =
   path wholefield;
@@ -35,14 +37,8 @@ def draw_field(expr x, y) =
   draw diamond withcolor field_color;
 enddef;
 
-def draw_name_box(expr x, y, number) =
+def draw_name_box(expr x, y, dy, descr) =
   path box;
-  % Give more vertical room for 9th inning.
-  if number = 9:
-    dy := inning_box_len * 2;
-  else:
-    dy := inning_box_len;
-  fi;
   box :=
        (x, y)
     -- (x+name_box_width, y)
@@ -50,7 +46,7 @@ def draw_name_box(expr x, y, number) =
     -- (x, y-dy)
     -- cycle;
   draw box withcolor box_color;
-  label(decimal number, (x+4, y-6));
+  label(descr, (x+4, y-6));
 enddef;
 
 def draw_field_box_header(expr x, y, inning, extra_descr) =
@@ -95,6 +91,41 @@ def draw_inning_summary_box(expr x, y) =
   label(btex {\small LOB} etex, (x + .25d, y - .85d));
 enddef;
 
+def draw_pitcher_header(expr x, y, dx, descr) =
+  path box;
+  dy := pitching_box_height;
+  box :=
+       (x, y)
+    -- (x+dx, y)
+    -- (x+dx, y-dy)
+    -- (x, y-dy)
+    -- cycle;
+  draw box withcolor box_color;
+  label(descr, (x+dx/2, y-dy/2));
+enddef;
+
+def draw_pitcher_header_line(expr x, y) =
+  draw_pitcher_header(x, y, name_box_width, "Pitcher");
+  string pitching_labels[];
+  pitching_labels[0] := "W/S/L";
+  pitching_labels[1] := "IP";
+  pitching_labels[2] := "H";
+  pitching_labels[3] := "R";
+  pitching_labels[4] := "ER";
+  pitching_labels[5] := "SO";
+  pitching_labels[6] := "BB";
+  for i = 0 upto 6:
+    draw_pitcher_header(x + name_box_width + (i*inning_box_len), y, inning_box_len, pitching_labels[i]);
+  endfor;
+enddef;
+
+def draw_pitcher_line(expr x, y, number) =
+  draw_name_box(x, y, pitching_box_height, decimal number);
+  for i = 0 upto 6:
+    draw_pitcher_header(x + name_box_width + (i*inning_box_len), y, inning_box_len, "");
+  endfor;
+enddef;
+
 beginfig (1)
   %% Inning headers
   for i = 0 upto innings - 1:
@@ -114,9 +145,14 @@ beginfig (1)
   endfor;
 
   %% Draw one row per batter
-  for j = 0 upto players - 1:
+  for j = 0 upto batters - 1:
     y := (j+1) * inning_box_len;
-    draw_name_box(0, -y, j+1);
+    if j = 8:
+      height := 2*inning_box_len;
+    else:
+      height := inning_box_len;
+    fi;
+    draw_name_box(0, -y, height, decimal (j+1));
 
     for i = 0 upto innings - 1:
       x := name_box_width + i * inning_box_len;
@@ -130,7 +166,7 @@ beginfig (1)
   endfor;
 
   %% Draw last row for inning totals
-  y := (players + 1) * inning_box_len;
+  y := (batters + 1) * inning_box_len;
   for i = 0 upto innings + extra_innings - 1:
     x := name_box_width + i * inning_box_len;
     if i >= innings:
@@ -139,5 +175,11 @@ beginfig (1)
     draw_inning_summary_box(x, -y);
   endfor;
 
+  %% Pitcher box
+  yoff := (batters + 2) * inning_box_len + gap;
+  draw_pitcher_header_line(0, -yoff);
+  for i = 1 upto pitchers:
+    draw_pitcher_line(0, -yoff - i*pitching_box_height, i);
+  endfor;
 endfig;
 bye
