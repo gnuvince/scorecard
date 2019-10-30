@@ -151,5 +151,11 @@ beginfig (1)
   for i = 1 upto pitchers:
     draw_pitcher_line(0, -yoff - i*pitching_box_height, i);
   endfor;
+
+  xoff := name_box_width + 7*inning_box_len + gap;
+  % A bit too hard coded?
+  w := 9*inning_box_len;
+  y := (pitchers+1)*pitching_box_height;
+  draw_box(xoff, -yoff, w, y);
 endfig;
 bye
