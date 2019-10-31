@@ -53,7 +53,7 @@ enddef;
 
 def draw_name_box(expr x, y, dy, descr) =
   draw_box(x, y, name_box_width, dy);
-  label(descr, (x+4, y-6));
+  label.lrt(descr, (x, y));
 enddef;
 
 def draw_inning_summary_box(expr x, y) =
@@ -157,5 +157,6 @@ beginfig (1)
   w := 9*inning_box_len;
   y := (pitchers+1)*pitching_box_height;
   draw_box(xoff, -yoff, w, y);
+  label.lrt("Notes", (xoff, -yoff));
 endfig;
 bye
