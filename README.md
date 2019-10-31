@@ -17,3 +17,8 @@ On Debian systems, you can run this command to have a full installation:
     $ sudo apt install texlive-full
 
 Then you can run `make` in the repository.
+
+# Acknowledgments
+
+- I was heavily inspired by [Christopher Swingley](https://swingleydev.com/baseball/scorecards.php)'s score sheets in making this scorecard.
+- [Bob Carpenter's scorebooks](https://bcscorebook.com/) were also a huge source of inspiration: his clean and minimal design is very much in line with what I am aiming for with my own scorecard.
