@@ -157,6 +157,5 @@ beginfig (1)
   w := 9*inning_box_len;
   y := (pitchers+1)*pitching_box_height;
   draw_box(xoff, -yoff, w, y);
-  label.rt("Notes", (xoff, -yoff-pitching_box_height/2));
 endfig;
 bye
