@@ -2,7 +2,12 @@
 \usepackage{graphicx}
 \usepackage[letterpaper, landscape, margin=0cm]{geometry}
 \begin{document}
-\includegraphics[scale=1]{scorecard-1.pdf}
-\newpage
-\includegraphics[scale=1]{scorecard-1.pdf}
+\newcount\numpages
+\numpages=2
+\loop
+  \newpage
+  \includegraphics[scale=1]{scorecard-1.pdf}
+  \advance \numpages -1
+\ifnum \numpages>0
+\repeat
 \end{document}
